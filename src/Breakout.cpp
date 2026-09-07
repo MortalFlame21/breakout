@@ -17,6 +17,9 @@ Breakout::Breakout() {
         const auto name{"block" + std::to_string(i)};
         ResourceManager::loadTexture(name, Texture{"resources/textures/" + name + ".png"});
     }
+
+    // game levels
+    _levels.emplace_back("resources/levels/level1.lvl");
 }
 
 void Breakout::run() {
@@ -46,6 +49,7 @@ void Breakout::render(float dt) {
     glClear(GL_COLOR_BUFFER_BIT);
 
     _renderer.draw({{400.f, 400.f}, {16.f, 16.f}, {0.f, 10.f}});
+    _levels[_selectedLevel].draw(_renderer);
 }
 
 void Breakout::poll() {

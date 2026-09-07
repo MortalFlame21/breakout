@@ -1,7 +1,10 @@
 #pragma once
 
+#include <vector> // std::vector
+
 #include "Window.h"
 #include "Renderer.h"
+#include "GameLevel.h"
 
 class Breakout {
 public:
@@ -16,4 +19,6 @@ private:
 
 	Window _window{"Breakout"};
 	Renderer _renderer{};
+	std::vector<GameLevel> _levels{};
+	std::size_t _selectedLevel{};
 };

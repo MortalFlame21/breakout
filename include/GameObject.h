@@ -12,18 +12,17 @@ public:
 		, _velocity{velocity}
 	{ }
 
-	//void setTexture(Texture& texture) { _texture = std::move(texture); }
-	//const Texture& texture(Texture& texture) const { return _texture; }
-
 	glm::vec2 position() const { return _position; }
 
 	glm::vec2 size() const { return _size; }
 
 	glm::vec2 velocity() const { return _velocity; }
 private:
-	Texture _texture{};
+	//Texture _texture{};
 	glm::vec2 _position{};
 	glm::vec2 _size{};
 	glm::vec2 _velocity{};
 };
+
+
 
