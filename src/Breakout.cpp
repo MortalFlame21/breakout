@@ -13,8 +13,8 @@ Breakout::Breakout() {
     ResourceManager::loadTexture("ball", Texture{"resources/textures/ball.png"});
     ResourceManager::loadTexture("paddle", Texture{"resources/textures/paddle.png"});
     ResourceManager::loadTexture("background", Texture{"resources/textures/background.png"});
-    for (int i{}; i < Texture::BLOCK_TEXTURE_SIZE; ++i) {
-        const auto name{"block" + std::to_string(i)};
+    for (int i{}; i < Texture::TILE_TEXTURE_SIZE; ++i) {
+        const auto name{"tile" + std::to_string(i)};
         ResourceManager::loadTexture(name, Texture{"resources/textures/" + name + ".png"});
     }
 
@@ -48,7 +48,7 @@ void Breakout::render(float dt) {
     glClearColor(1.0f, 1.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
 
-    _renderer.draw({{400.f, 400.f}, {16.f, 16.f}, {0.f, 10.f}});
+    //_renderer.draw({{400.f, 400.f}, {32.f, 32.f}});
     _levels[_selectedLevel].draw(_renderer);
 }
 

@@ -19,7 +19,8 @@ add_executable(breakout
 				src/Window.cpp 
 				src/Renderer.cpp 
 				src/Texture.cpp 
-				src/stb_image.cpp "include/GameLevel.h" "src/GameLevel.cpp") 
+				src/stb_image.cpp 
+				src/GameLevel.cpp) 
 
 target_link_libraries(breakout ${GLFW3_LIBRARY} OpenGL::GL)
 

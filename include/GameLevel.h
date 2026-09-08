@@ -11,5 +11,5 @@ public:
 	explicit GameLevel(std::string_view file);
 	void draw(Renderer& renderer) const;
 private:
-	std::vector<GameObject> _tiles{};
+	std::vector<GameTile> _tiles{};
 };

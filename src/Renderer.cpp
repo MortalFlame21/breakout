@@ -24,6 +24,6 @@ void Renderer::draw(const GameObject& o) const {
     ResourceManager::getShader("default").setUniformM("uModel", 1, GL_FALSE, model);
     ResourceManager::getShader("default").setUniformV("uTexture", 0);
 	_vao.bind();
-	ResourceManager::getTexture("ball").bind();
+	o.texture().bind();
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
 }

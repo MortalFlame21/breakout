@@ -15,7 +15,7 @@ public:
 	}
 
 	static ShaderProgram& getShader(const std::string& name) {
-		return _shaders[name];
+		return _shaders.at(name);
 	}
 
 	static void loadTexture(const std::string& name, Texture&& texture) {
@@ -23,7 +23,7 @@ public:
 	}
 
 	static Texture& getTexture(const std::string& name) {
-		return _textures[name];
+		return _textures.at(name);
 	}
 private:
 	static inline std::unordered_map<std::string, ShaderProgram> _shaders{};

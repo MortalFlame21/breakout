@@ -1,5 +1,6 @@
 #include <algorithm> // std::clamp
 #include <fstream> // std::ifstream
+#include <iostream>
 
 #include "GameLevel.h"
 #include "Window.h"
@@ -14,22 +15,22 @@ GameLevel::GameLevel(std::string_view file) {
 
 	tilesX = std::clamp(tilesX, 3, 15);
 	tilesY = std::clamp(tilesY, 2, 10);
-	
-	const glm::vec2 tileSz{Window::WIDTH / tilesX , 50};
 
-	int tileHardness{};
-	for (int i{}; i < tilesX; ++i) {
-		for (int j{}; j < tilesY; ++j) {
-			ifs >> tileHardness;
+	const glm::vec2 tileSz{Window::WIDTH / tilesX, Window::HEIGHT / 10};
+
+	int tileStrength{};
+	for (int i{}; i < tilesY; ++i) {
+		for (int j{}; j < tilesX; ++j) {
+			ifs >> tileStrength;
 
 			// hardness == 0 is air 
-			if (tileHardness <= 0) continue;
-			tileHardness = std::clamp(tilesX, 1, 5);
+			if (tileStrength <= 0) continue;
+			tileStrength = std::clamp(tileStrength, GameTile::strengthMin, GameTile::strengthMax);
 
-			const auto tilePosX{(tileSz.x / 2) + tileSz.x * i};
-			const auto tilePosY{(tileSz.y / 2) + tileSz.y * j};
-
-			_tiles.push_back({ {tilePosX, tilePosY}, tileSz, {} });
+			const glm::vec2 tilePos{tileSz.x / 2 + tileSz.x * j, tileSz.y / 2 + tileSz.y * i};
+			GameTile tile{tilePos, tileSz, tileStrength};
+			tile.texture(GameTile::strengthTexture(tileStrength));
+			_tiles.push_back(tile);
 		}
 	}
 }

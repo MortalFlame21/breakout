@@ -7,7 +7,7 @@
 
 class Texture {
 public:
-	static constexpr inline auto BLOCK_TEXTURE_SIZE{5};
+	static constexpr inline auto TILE_TEXTURE_SIZE{5};
 
 	Texture();
 	explicit Texture(std::string_view path);
