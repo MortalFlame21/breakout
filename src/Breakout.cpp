@@ -48,8 +48,9 @@ void Breakout::render(float dt) {
     glClearColor(1.0f, 1.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
 
-    //_renderer.draw({{400.f, 400.f}, {32.f, 32.f}});
     _levels[_selectedLevel].draw(_renderer);
+    _renderer.draw(_player);
+    _renderer.draw(_ball);
 }
 
 void Breakout::poll() {

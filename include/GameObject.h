@@ -7,15 +7,28 @@
 
 class GameObject {
 public:
+	GameObject() = default;
+
 	GameObject(const glm::vec2& position, const glm::vec2& size)
 		: _position{position}, _size{size} { }
 
 	glm::vec2 position() const { return _position; }
+	GameObject& setPosition(const glm::vec2& position) { 
+		_position = position;
+		return *this;
+	}
 
 	glm::vec2 size() const { return _size; }
+	GameObject& setSize(const glm::vec2& size) { 
+		_size = size; 
+		return *this;
+	}
 
 	Texture& texture() const { return ResourceManager::getTexture(_texture); }
-	void texture(const std::string& texture) { _texture = texture; }
+	GameObject& setTexture(const std::string& texture) {
+		_texture = texture;
+		return *this;
+	}
 protected:
 	glm::vec2 _position{};
 	glm::vec2 _size{};
@@ -46,15 +59,24 @@ private:
 
 class GameObjectMoveable : public GameObject {
 public:
+	GameObjectMoveable() = default;
+
 	GameObjectMoveable(const glm::vec2& position, const glm::vec2& size, const glm::vec2& velocity)
 		: GameObject{position, size}, _velocity{velocity} { }
 
 	glm::vec2 velocity() const { return _velocity; }
+	GameObjectMoveable& setVelocity(const glm::vec2& velocity) { 
+		_velocity = velocity;
+		return *this;
+	}
 private:
 	glm::vec2 _velocity{};
 };
 
 class GameBall : public GameObjectMoveable {
+public:
+	GameBall() = default;
+
 	GameBall(const glm::vec2& position, const glm::vec2& size, const glm::vec2& velocity)
 		: GameObjectMoveable{position, size, velocity} {
 		_texture = "ball";
@@ -62,6 +84,9 @@ class GameBall : public GameObjectMoveable {
 };
 
 class GamePaddle : public GameObjectMoveable {
+public:
+	GamePaddle() = default;
+
 	GamePaddle(const glm::vec2& position, const glm::vec2& size, const glm::vec2& velocity)
 		: GameObjectMoveable{position, size, velocity} {
 		_texture = "paddle";

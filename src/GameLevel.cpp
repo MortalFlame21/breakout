@@ -29,7 +29,7 @@ GameLevel::GameLevel(std::string_view file) {
 
 			const glm::vec2 tilePos{tileSz.x / 2 + tileSz.x * j, tileSz.y / 2 + tileSz.y * i};
 			GameTile tile{tilePos, tileSz, tileStrength};
-			tile.texture(GameTile::strengthTexture(tileStrength));
+			tile.setTexture(GameTile::strengthTexture(tileStrength));
 			_tiles.push_back(tile);
 		}
 	}
