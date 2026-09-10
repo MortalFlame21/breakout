@@ -32,4 +32,3 @@ void Window::framebuffer_size_callback(GLFWwindow* window, int w, int h) {
 		self->_height = h;
 	}
 }
-

@@ -20,9 +20,7 @@ private:
 	Window _window{"Breakout"};
 	Renderer _renderer{};
 	std::vector<GameLevel> _levels{};
-	GamePaddle _player{{Window::WIDTH / 2, Window::HEIGHT - Window::HEIGHT / 25}, 
-					   {Window::WIDTH / 5, Window::HEIGHT / 25}, 
-					   {}};
-	GameBall _ball{{Window::WIDTH / 2, Window::HEIGHT / 2}, {25.f, 25.f}, {}};
+	GamePaddle _player{};
+	GameBall _ball{};
 	std::size_t _selectedLevel{};
 };
