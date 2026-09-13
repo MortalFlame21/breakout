@@ -11,11 +11,15 @@ public:
 	Breakout();
 
 	void run();
+private:
+	enum class State { ACTIVE, MENU, WINNER };
+
 	void update(float dt);
 	void render(float dt);
 	void poll();
-private:
-	enum class State { ACTIVE, MENU, WINNER };
+	void wallCollisions();
+	void tileCollisions();
+	void paddleCollisions();
 
 	Window _window{"Breakout"};
 	Renderer _renderer{};

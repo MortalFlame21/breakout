@@ -8,8 +8,8 @@
 
 class Window {
 public:
-	static inline constexpr int WIDTH{800};
-	static inline constexpr int HEIGHT{800};
+	static inline constexpr float WIDTH{800.f};
+	static inline constexpr float HEIGHT{800.f};
 
 	explicit Window(std::string_view title);
 
@@ -25,13 +25,13 @@ public:
 
 	GLFWwindow* data() const { return _window; }
 
-	int width() const { return _width; }
+	float width() const { return static_cast<float>(_width); }
 
-	int height() const { return _height; }
+	float height() const { return static_cast<float>(_height); }
 private:
 	static void framebuffer_size_callback(GLFWwindow* window, int w, int h);
 
 	GLFWwindow* _window{};
-	int _width{WIDTH};
-	int _height{HEIGHT};
+	int _width{static_cast<int>(WIDTH)};
+	int _height{static_cast<int>(HEIGHT)};
 };

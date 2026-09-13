@@ -10,6 +10,7 @@ class GameLevel {
 public:
 	explicit GameLevel(std::string_view file);
 	void draw(Renderer& renderer) const;
+	std::vector<GameTile>& tiles() { return _tiles; }
 private:
 	std::vector<GameTile> _tiles{};
 };

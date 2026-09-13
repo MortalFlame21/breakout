@@ -1,11 +1,13 @@
 #pragma once
 
 #include <glm/glm.hpp>
+#include <glm/gtx/common.hpp>
 
 #include "Texture.h"
 #include "ResourceManager.h"
 #include "Window.h"
 
+// generic game object
 class GameObject {
 public:
 	GameObject() = default;
@@ -28,7 +30,7 @@ public:
 
 	glm::vec3 color() const { return _color; }
 	GameObject& setColor(const glm::vec3& color) { 
-		_size = color; 
+		_color = color; 
 		return *this;
 	}
 
@@ -51,6 +53,52 @@ protected:
 	std::string _shader{};
 };
 
+// class that can move
+class Moveable {
+public:
+	Moveable(const glm::vec2& velocity)
+		: _velocity{velocity} { }
+
+	glm::vec2& velocity() { return _velocity; }
+	glm::vec2 velocity() const { return _velocity; }
+	void setVelocity(const glm::vec2& velocity) { _velocity = velocity; }
+protected:
+	glm::vec2 _velocity{};
+};
+
+// class that interacts with other classes
+class Interactable {
+public:
+	struct CollisionInfo {
+		enum class Direction { UP, DOWN, LEFT, RIGHT };
+		bool collided{};
+		Direction direction{};
+		glm::vec2 difference{};
+	};
+
+	virtual CollisionInfo collides(GameObject& o) { return {}; };
+
+	static CollisionInfo::Direction direction(const glm::vec2& v) {
+		const glm::vec2 dirs[]{
+			glm::vec2{0.f, 1.f},  // up
+			glm::vec2{0.f, -1.f}, // down
+			glm::vec2{-1.f, 0.f}, // left
+			glm::vec2{1.f, 0.f},  // right
+		};
+		float max{};
+		CollisionInfo::Direction bestMatch{};
+
+		for (std::size_t i{}; const auto& d : dirs) {
+			if (auto dp{glm::dot(glm::normalize(v), d)}; dp > max) {
+				max = dp;
+				bestMatch = static_cast<CollisionInfo::Direction>(i);
+			}
+			++i;
+		}
+		return bestMatch;
+	}
+};
+
 class GameBackground : public GameObject {
 public:
 	GameBackground() : GameObject{{ Window::WIDTH / 2, Window::HEIGHT / 2 }, { Window::WIDTH, Window::HEIGHT }}
@@ -59,7 +107,10 @@ public:
 	}
 };
 
-class GameTile : public GameObject {
+class GameTile 
+	: public GameObject
+	, public Interactable
+{
 public:
 	// invariant strength < 0, if == 0 we destruct -- boom.
 
@@ -77,38 +128,27 @@ public:
 	}
 
 	void weaken() { --_strength; }
+	bool alive() const { return _strength > 0; }
+	int strength() const { return _strength; }
 private:
 	int _strength{};
 };
 
-class GameObjectMoveable : public GameObject {
-public:
-	GameObjectMoveable() = default;
-
-	GameObjectMoveable(const glm::vec2& position, const glm::vec2& size, const glm::vec2& velocity)
-		: GameObject{position, size}, _velocity{velocity} { }
-
-	glm::vec2& velocity() { return _velocity; }
-	glm::vec2 velocity() const { return _velocity; }
-	GameObjectMoveable& setVelocity(const glm::vec2& velocity) { 
-		_velocity = velocity;
-		return *this;
-	}
-protected:
-	glm::vec2 _velocity{};
-};
-
-class GamePaddle : public GameObjectMoveable {
+class GamePaddle
+	: public GameObject
+	, public Moveable
+	, public Interactable
+{
 public:
 	GamePaddle()
-		: GameObjectMoveable{{Window::WIDTH / 2, Window::HEIGHT - 40.f}, 
-							 {200.f, 40.f}, {250.f, 0.f}} 
+		: GameObject{{Window::WIDTH / 2, Window::HEIGHT - 40.f}, {200.f, 40.f}}
+		, Moveable{{250.f, 0.f}}
 	{
 		_texture = "paddle";
 	}
 
 	void input(float dt, Window& window) {
-		const auto pressed{[&](int k) { return glfwGetKey(window.data(), k) == GLFW_PRESS; }};
+		const auto pressed{ [&](int k) { return glfwGetKey(window.data(), k) == GLFW_PRESS; } };
 
 		if (pressed(GLFW_KEY_A) || pressed(GLFW_KEY_LEFT)) {
 			_position += dt * -_velocity;
@@ -119,14 +159,18 @@ public:
 	}
 };
 
-class GameBall : public GameObjectMoveable {
+class GameBall
+	: public GameObject
+	, public Moveable
+	, public Interactable
+{
 public:
-	static inline const glm::vec2 startVelocity{500.f, -300.f};
+	static inline const glm::vec2 startVelocity{ 500.f, -300.f };
 
 	GameBall()
-		: GameObjectMoveable{{Window::WIDTH / 2, Window::HEIGHT / 2}, 
-							 {25.f, 25.f}, startVelocity} 
-	{ 
+		: GameObject{ {Window::WIDTH / 2, Window::HEIGHT / 2}, {25.f, 25.f} }
+		, Moveable{ startVelocity }
+	{
 		_texture = "ball";
 	}
 
@@ -136,21 +180,31 @@ public:
 	}
 
 	bool stuck() const { return _stuck; }
-	GameBall& setStuck(bool stuck) { 
-		_stuck = stuck; 
+	GameBall& setStuck(bool stuck) {
+		_stuck = stuck;
 		return *this;
 	}
 
-	float radius() const { return size().x / 2; } 
+	float radius() const { return size().x / 2; }
 
 	void update(float dt, Window& window, GamePaddle& player) {
-		if (!_stuck) {
+		if (!_stuck)
 			move(dt);
-
-		}
 		else
-			setPosition(player.position() - glm::vec2{0.f, player.size().y});
+			setPosition(player.position() - glm::vec2{ 0.f, player.size().y });
+	}
+	
+	virtual CollisionInfo collides(GameObject& o) override {
+		const glm::vec2 aabbHalfLengths{o.size().x / 2, o.size().y / 2}; 
+		const glm::vec2 aabbCenter{o.position()}; 
+		const auto posDiff{_position - aabbCenter};
+		const auto clamped{glm::clamp(posDiff, -aabbHalfLengths, aabbHalfLengths)};
+		const auto closest{aabbCenter + clamped};
+		const auto diff{closest - position()};
+		if (glm::length(diff) < radius()) 
+			return {true, Interactable::direction(diff), diff}; 
+		return {false, CollisionInfo::Direction::UP, {}};
 	}
 private:
-	bool _stuck{true};
+	bool _stuck{ true };
 };
