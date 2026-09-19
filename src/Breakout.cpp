@@ -13,6 +13,7 @@ Breakout::Breakout() {
     ResourceManager::loadTexture("ball", Texture{"resources/textures/ball.png"});
     ResourceManager::loadTexture("paddle", Texture{"resources/textures/paddle.png"});
     ResourceManager::loadTexture("background", Texture{"resources/textures/background.png"});
+    ResourceManager::loadTexture("winner", Texture{"resources/textures/winner.png"});
     for (int i{}; i < Texture::TILE_TEXTURE_SIZE; ++i) {
         const auto name{"tile" + std::to_string(i)};
         ResourceManager::loadTexture(name, Texture{"resources/textures/" + name + ".png"});
@@ -20,6 +21,8 @@ Breakout::Breakout() {
 
     // game levels
     _levels.emplace_back("resources/levels/level1.lvl");
+    _levels.emplace_back("resources/levels/level2.lvl");
+    _levels.emplace_back("resources/levels/level3.lvl");
 }
 
 void Breakout::run() {
@@ -42,6 +45,8 @@ void Breakout::run() {
 }
 
 void Breakout::update(float dt) {
+    if (_hasWon) return;
+
     // input
     _player.input(dt, _window);
     if (glfwGetKey(_window.data(), GLFW_KEY_SPACE) == GLFW_PRESS)
@@ -53,15 +58,24 @@ void Breakout::update(float dt) {
     wallCollisions();
     tileCollisions();
     paddleCollisions();
+
+    // game and level check
+    if (_levels[_selectedLevel].tiles().empty())
+       ++_selectedLevel;
+    if (_selectedLevel >= _levels.size())
+        _hasWon = true;
 }
 
 void Breakout::render(float dt) {
     glClearColor(1.0f, 1.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
 
-    const static GameBackground bg{};
-    _renderer.draw(bg);
-    _levels [_selectedLevel].draw(_renderer);
+	const static GameBackground bgPlay{"background"};
+	const static GameBackground bgWin{"winner"};
+	_renderer.draw(_hasWon ? bgWin : bgPlay);
+    if (_hasWon) return;
+
+    _levels[_selectedLevel].draw(_renderer);
     _renderer.draw(_player);
     _renderer.draw(_ball);
 }
@@ -91,7 +105,7 @@ void Breakout::wallCollisions() {
     }
     // bottom wall
     if (_ball.position().y + _ball.radius() >= Window::HEIGHT) {
-        //restart();
+        restart();
     }
     // paddle-wall collision 
     // left wall
@@ -107,12 +121,10 @@ void Breakout::tileCollisions() {
 
     auto& level{_levels[_selectedLevel].tiles()};
     for (auto& tile : level) {
-        if (!tile.alive())
-            continue;
+        if (!tile.alive()) continue;
             
         auto collision{_ball.collides(tile)};
-        if (!collision.collided)
-            continue;
+        if (!collision.collided) continue;
 
         // resolve collision
         using Dir = Interactable::CollisionInfo::Direction;
@@ -146,4 +158,9 @@ void Breakout::paddleCollisions() {
         _ball.velocity().y = -std::abs(_ball.velocity().y);
         _ball.setVelocity(glm::normalize(_ball.velocity()) * glm::length(oldV));
     }
+}
+
+void Breakout::restart() {
+    _ball = _ball.setStuck(true);
+    _player.setPosition(GamePaddle::startPosition);
 }

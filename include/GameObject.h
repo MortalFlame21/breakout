@@ -101,9 +101,9 @@ public:
 
 class GameBackground : public GameObject {
 public:
-	GameBackground() : GameObject{{ Window::WIDTH / 2, Window::HEIGHT / 2 }, { Window::WIDTH, Window::HEIGHT }}
+	GameBackground(std::string&& bg) : GameObject{{Window::WIDTH / 2, Window::HEIGHT / 2}, {Window::WIDTH, Window::HEIGHT}}
 	{
-		_texture = "background";
+		_texture = std::move(bg);
 	}
 };
 
@@ -140,8 +140,10 @@ class GamePaddle
 	, public Interactable
 {
 public:
+	static inline const glm::vec2 startPosition{Window::WIDTH / 2, Window::HEIGHT - 40.f};
+
 	GamePaddle()
-		: GameObject{{Window::WIDTH / 2, Window::HEIGHT - 40.f}, {200.f, 40.f}}
+		: GameObject{startPosition, {200.f, 40.f}}
 		, Moveable{{250.f, 0.f}}
 	{
 		_texture = "paddle";

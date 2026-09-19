@@ -20,6 +20,7 @@ private:
 	void wallCollisions();
 	void tileCollisions();
 	void paddleCollisions();
+	void restart();
 
 	Window _window{"Breakout"};
 	Renderer _renderer{};
@@ -27,4 +28,5 @@ private:
 	GamePaddle _player{};
 	GameBall _ball{};
 	std::size_t _selectedLevel{};
+	bool _hasWon{};
 };
