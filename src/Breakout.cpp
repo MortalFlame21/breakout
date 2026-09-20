@@ -60,8 +60,10 @@ void Breakout::update(float dt) {
     paddleCollisions();
 
     // game and level check
-    if (_levels[_selectedLevel].tiles().empty())
+    if (_levels[_selectedLevel].tiles().empty()) {
+       restart();
        ++_selectedLevel;
+    }
     if (_selectedLevel >= _levels.size())
         _hasWon = true;
 }
