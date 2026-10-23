@@ -1,12 +1,13 @@
 #include "Breakout.h"
 #include "ResourceManager.h"
+#include "Audio.h"
 
 #include <glad/glad.h>
 #include <glm/gtc/matrix_transform.hpp>
 
 Breakout::Breakout() {
     // shaders
-    ResourceManager::loadShader("default", ShaderProgram{});  
+    ResourceManager::loadShader("default", ShaderProgram{});
 
     // textures
     Texture::setup();
@@ -23,14 +24,17 @@ Breakout::Breakout() {
     _levels.emplace_back("resources/levels/level1.lvl");
     _levels.emplace_back("resources/levels/level2.lvl");
     _levels.emplace_back("resources/levels/level3.lvl");
+
+    // sound
+    AudioEngine::init();
 }
 
 void Breakout::run() {
     float deltaTime{};
     float prevTime{};
-    
+
     ResourceManager::getShader("default").use();
-    ResourceManager::getShader("default").setUniformM("uProjection", 1, GL_FALSE, 
+    ResourceManager::getShader("default").setUniformM("uProjection", 1, GL_FALSE,
 	    glm::ortho(0.f, Window::WIDTH, Window::HEIGHT, 0.f, -1.f, 1.f));
 
     while (_window.running()) {
@@ -62,10 +66,13 @@ void Breakout::update(float dt) {
     // game and level check
     if (_levels[_selectedLevel].tiles().empty()) {
        restart();
+        AudioEngine::get().playSound("resources/audio/next_level.mp3");
        ++_selectedLevel;
     }
-    if (_selectedLevel >= _levels.size())
+    if (_selectedLevel >= _levels.size()) {
         _hasWon = true;
+        AudioEngine::get().playSound("resources/audio/next_level.mp3");
+    }
 }
 
 void Breakout::render(float dt) {
@@ -88,7 +95,7 @@ void Breakout::poll() {
 }
 
 void Breakout::wallCollisions() {
-	// not clean but idc no more, need to consume more knowledge, this project is delaying me 
+	// not clean but idc no more, need to consume more knowledge, this project is delaying me
     // ball-wall collision
     // left wall
     if (_ball.position().x - _ball.radius() <= 0.f) {
@@ -107,9 +114,10 @@ void Breakout::wallCollisions() {
     }
     // bottom wall
     if (_ball.position().y + _ball.radius() >= Window::HEIGHT) {
+        AudioEngine::get().playSound("resources/audio/fail.mp3");
         restart();
     }
-    // paddle-wall collision 
+    // paddle-wall collision
     // left wall
     if (_player.position().x - (_player.size().x / 2) <= 0.f)
         _player.position().x = (_player.size().x / 2);
@@ -124,7 +132,7 @@ void Breakout::tileCollisions() {
     auto& level{_levels[_selectedLevel].tiles()};
     for (auto& tile : level) {
         if (!tile.alive()) continue;
-            
+
         auto collision{_ball.collides(tile)};
         if (!collision.collided) continue;
 
@@ -142,6 +150,7 @@ void Breakout::tileCollisions() {
         }
 
 		tile.weaken();
+        AudioEngine::get().playSound("resources/audio/hit.mp3");
 		tile.setTexture(GameTile::strengthTexture(tile.strength()));
     }
 
@@ -154,7 +163,7 @@ void Breakout::paddleCollisions() {
         auto distanceX{_ball.position().x - _player.position().x};
         auto damp{distanceX / (_player.size().x / 2)};
         constexpr auto bounceStrength{2.f};
-        
+
         const auto oldV{_ball.velocity()};
         _ball.velocity().x = GameBall::startVelocity.x * damp * bounceStrength;
         _ball.velocity().y = -std::abs(_ball.velocity().y);

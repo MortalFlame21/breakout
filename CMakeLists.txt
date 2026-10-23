@@ -16,11 +16,12 @@ add_executable(breakout
 				src/main.cpp
 				src/glad.c
 				src/Breakout.cpp
-				src/Window.cpp 
-				src/Renderer.cpp 
-				src/Texture.cpp 
-				src/stb_image.cpp 
-				src/GameLevel.cpp) 
+				src/Window.cpp
+				src/Renderer.cpp
+				src/Texture.cpp
+				src/stb_image.cpp
+				src/GameLevel.cpp
+				src/miniaudio.c)
 
 target_link_libraries(breakout ${GLFW3_LIBRARY} OpenGL::GL)
 
